@@ -1,38 +1,21 @@
-import Player from '@vimeo/player';
-const videoPlayer = document.querySelector("#vimeo-player");
-const player = new Vimeo.Player(videoPlayer);
-const localStorageKey = "videoplayer-current-time";
+import Player from "@vimeo/player";
+import throttle from "lodash.throttle";
 
-    player.on('play', function() {
-        console.log('played the video!');
-    });
-
-    player.getVideoTitle().then(function(title) {
-        console.log('title:', title);
-    });
-
-
-// Отримайте поточний час відтворення відео
-const currentTime = videoPlayer.currentTime;
-
-// Збережіть поточний час відтворення в локальному сховищі
-localStorage.setItem('localStorageKey', currentTime);
-
-// Відслідковуйте подію завантаження відео
-videoPlayer.addEventListener('loadedmetadata', () => {
-  // Отримайте збережений час відтворення з локального сховища
-  const savedTime = localStorage.getItem('localStorageKey');
-
-  // Якщо є збережений час відтворення, встановіть його
-  if (savedTime !== null) {
-    videoPlayer.currentTime = parseFloat(savedTime);
-  }
-
-  // Почніть відтворення відео
-  videoPlayer.play();
-});
-
-// Видаліть збережений час відтворення при завершенні відтворення відео
-videoPlayer.addEventListener('ended', () => {
-  localStorage.removeItem('localStorageKey');
-});
+const iframe = document.querySelector('iframe');
+const player = new Player(iframe);
+const currentTime = 'videoplayer-current-time';
+const locStorSet = function(e) {
+    console.log(e.seconds);
+    const startSec = Number(e.seconds);
+    localStorage.setItem(currentTime, startSec)
+}
+player.on('timeupdate', throttle(locStorSet, 1000));
+player.setCurrentTime(localStorage.getItem(currentTime)).then(function(seconds) {
+}).catch(function(error) {
+    switch (error.name) {
+        case 'RangeError':
+            break;
+        default:
+            break;
+    }
+}); 
